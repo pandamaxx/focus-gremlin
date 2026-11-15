@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#07060A">
+  <title>Focus Gremlin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --void: #07060A;
+      --circuit: #1A1A26;
+      --silver: #E4DDDB;
+      --bone: #ECEAE4;
+      --iron: #7F7778;
+      --violet: #725282;
+      --mercury: #63358D;
+      --uv: #9B5CFF;
+      --floor: #301F38;
+      --gold: #D4AF5A;
+      --halo: #39FF14;
+      --blood: #8E3A42;
+      --ink: #ECEAE4;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { min-height: 100%; background: var(--void); color: var(--ink); }
+    body {
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      font-size: 15px;
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+    .fx {
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background:
+        radial-gradient(ellipse at 50% -10%, rgba(99, 53, 141, 0.28), transparent 55%),
+        radial-gradient(ellipse at 80% 100%, rgba(48, 31, 56, 0.7), transparent 50%),
+        var(--void);
+    }
+    .fx::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 2px,
+        rgba(0, 0, 0, 0.18) 3px
+      );
+      opacity: 0.45;
+    }
+    .grain {
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      opacity: 0.07;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+    main {
+      position: relative;
+      z-index: 2;
+      max-width: 32rem;
+      margin: 0 auto;
+      padding: 2.5rem 1.25rem 4rem;
+    }
+    header { text-align: center; margin-bottom: 2.25rem; }
+    .mark {
+      color: var(--gold);
+      letter-spacing: 0.28em;
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      margin-bottom: 0.7rem;
+    }
+    h1 {
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-weight: 600;
+      font-size: clamp(2.4rem, 9vw, 3.5rem);
+      letter-spacing: 0.02em;
+      line-height: 1;
+      color: var(--silver);
+      text-shadow: 2px 0 rgba(155, 92, 255, 0.55), -2px 0 rgba(57, 255, 20, 0.25);
+      animation: glitch 7s steps(2, end) infinite;
+    }
+    @keyframes glitch {
+      0%, 92%, 100% { transform: none; }
+      93% { transform: translate(-2px, 1px); }
+      95% { transform: translate(2px, -1px); }
+      97% { transform: none; }
+    }
+    .tag {
+      margin-top: 0.7rem;
+      color: var(--iron);
+      font-size: 0.82rem;
+    }
+    section.panel {
+      background: rgba(26, 26, 38, 0.72);
+      border: 1px solid rgba(114, 82, 130, 0.45);
+      padding: 1.25rem;
+      box-shadow: 0 0 0 1px rgba(7, 6, 10, 0.8), 0 0 40px rgba(155, 92, 255, 0.07);
+    }
+    label, .sub {
+      display: block;
+      color: var(--iron);
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+    input[type="text"] {
+      width: 100%;
+      background: var(--void);
+      color: var(--bone);
+      border: 1px solid rgba(114, 82, 130, 0.6);
+      padding: 0.85rem 0.9rem;
+      font: inherit;
+      font-size: 0.95rem;
+      outline: none;
+      border-radius: 0;
+    }
+    input[type="text"]:focus {
+      border-color: var(--uv);
+      box-shadow: 0 0 0 1px var(--uv);
+    }
+    input[type="text"]::placeholder { color: #5a5456; }
+    .actions {
+      display: flex;
+      gap: 0.6rem;
+      margin-top: 0.9rem;
+      flex-wrap: wrap;
+    }
+    button {
+      font: inherit;
+      cursor: pointer;
+      border: 1px solid var(--uv);
+      background: var(--mercury);
+      color: var(--bone);
+      padding: 0.85rem 1.1rem;
+      min-height: 44px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      flex: 1;
+    }
+    button:hover, button:focus-visible {
+      background: #7a45ad;
+      box-shadow: 0 0 18px rgba(155, 92, 255, 0.35);
+      outline: none;
+    }
+    button.ghost {
+      background: transparent;
+      color: var(--silver);
+      border-color: rgba(114, 82, 130, 0.7);
+    }
+    button.ghost:hover, button.ghost:focus-visible {
+      background: rgba(99, 53, 141, 0.25);
+      box-shadow: none;
+    }
+    button.danger {
+      background: transparent;
+      color: #c56b72;
+      border-color: var(--blood);
+    }
+    button.danger:hover, button.danger:focus-visible {
+      background: rgba(142, 58, 66, 0.25);
+      box-shadow: none;
+    }
+    button:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
+    .task-now {
+      text-align: center;
+      color: var(--silver);
+      margin-bottom: 0.4rem;
+      word-break: break-word;
+    }
+    .timer {
+      font-size: clamp(4rem, 20vw, 6.2rem);
+      font-weight: 400;
+      letter-spacing: 0.04em;
+      text-align: center;
+      line-height: 1;
+      color: var(--silver);
+      font-variant-numeric: tabular-nums;
+      padding: 0.6rem 0 0.9rem;
+      text-shadow: 0 0 24px rgba(155, 92, 255, 0.35);
+    }
+    .timer.done {
+      color: var(--gold);
+    }
+    .hint {
+      text-align: center;
+      color: var(--iron);
+      font-size: 0.78rem;
+      margin-bottom: 0.2rem;
+    }
+    .log { margin-top: 2.2rem; }
+    .log h2 {
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-weight: 500;
+      font-size: 1.5rem;
+      letter-spacing: 0.04em;
+      color: var(--silver);
+      border-bottom: 1px solid rgba(114, 82, 130, 0.4);
+      padding-bottom: 0.4rem;
+      margin-bottom: 0.9rem;
+    }
+    .empty { color: var(--iron); font-size: 0.85rem; }
+    ul { list-style: none; }
+    li.entry {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0.35rem 0.8rem;
+      padding: 0.85rem 0;
+      border-bottom: 1px solid rgba(114, 82, 130, 0.25);
+    }
+    .entry .what { color: var(--bone); }
+    .entry .meta {
+      color: var(--iron);
+      font-size: 0.72rem;
+      grid-column: 1;
+    }
+    .entry button {
+      grid-row: 1 / span 2;
+      align-self: center;
+      flex: none;
+      padding: 0.4rem 0.65rem;
+      min-height: 36px;
+      font-size: 0.65rem;
+    }
+    [hidden] { display: none !important; }
+    @media (prefers-reduced-motion: reduce) {
+      h1 { animation: none; text-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="fx" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+  <main>
+    <header>
+      <p class="mark">Shadow Entropy</p>
+      <h1>Focus Gremlin</h1>
+      <p class="tag">One thing. Not six.</p>
+    </header>
+
+    <section id="setup" class="panel">
+      <label for="task">The one thing</label>
+      <input id="task" type="text" maxlength="140" placeholder="A shirt. A verse. A cut. Pick one." autocomplete="off">
+      <div class="actions">
+        <button id="start" type="button">Start</button>
+      </div>
+    </section>
+
+    <section id="session" class="panel" hidden>
+      <p class="task-now" id="current-task"></p>
+      <div class="timer" id="timer" aria-live="polite">25:00</div>
+      <div class="actions">
+        <button id="pause" class="ghost" type="button">Pause</button>
+        <button id="giveup" class="danger" type="button">Give up</button>
+      </div>
+    </section>
+
+    <section id="ship" class="panel" hidden>
+      <p class="hint">Time's up. Don't bounce.</p>
+      <p class="task-now" id="ship-task"></p>
+      <div class="timer done" id="timer-done">00:00</div>
+      <label for="shipped">What did you ship?</label>
+      <input id="shipped" type="text" maxlength="200" placeholder="One honest line." autocomplete="off">
+      <div class="actions">
+        <button id="save" type="button">Save</button>
+      </div>
+    </section>
+
+    <section class="log">
+      <h2>Shipped</h2>
+      <p id="empty" class="empty">Nothing here. As expected.</p>
+      <ul id="entries"></ul>
+    </section>
+  </main>
+  <script>
+    (function () {
+      var DEFAULT_MIN = 25;
+      var SESSION_KEY = "focus-gremlin-session";
+      var SHIPPED_KEY = "focus-gremlin-shipped";
+
+      var minParam = parseFloat(new URLSearchParams(location.search).get("min"));
+      var sessionMinutes = (isFinite(minParam) && minParam > 0) ? minParam : DEFAULT_MIN;
+      var DURATION_MS = Math.round(sessionMinutes * 60 * 1000);
+
+      var setupEl = document.getElementById("setup");
+      var sessionEl = document.getElementById("session");
+      var shipEl = document.getElementById("ship");
+      var taskInput = document.getElementById("task");
+      var currentTaskEl = document.getElementById("current-task");
+      var shipTaskEl = document.getElementById("ship-task");
+      var timerEl = document.getElementById("timer");
+      var shippedInput = document.getElementById("shipped");
+      var emptyEl = document.getElementById("empty");
+      var entriesEl = document.getElementById("entries");
+      var startBtn = document.getElementById("start");
+      var pauseBtn = document.getElementById("pause");
+      var giveupBtn = document.getElementById("giveup");
+      var saveBtn = document.getElementById("save");
+
+      var session = null;
+      var tickId = null;
+
+      function loadSession() {
+        try { return JSON.parse(localStorage.getItem(SESSION_KEY) || "null"); }
+        catch (e) { return null; }
+      }
+      function saveSession(s) {
+        session = s;
+        if (s) localStorage.setItem(SESSION_KEY, JSON.stringify(s));
+        else localStorage.removeItem(SESSION_KEY);
+      }
+      function loadShipped() {
+        try { return JSON.parse(localStorage.getItem(SHIPPED_KEY) || "[]"); }
+        catch (e) { return []; }
+      }
+      function saveShipped(list) {
+        localStorage.setItem(SHIPPED_KEY, JSON.stringify(list));
+      }
+
+      function formatTime(ms) {
+        var total = Math.max(0, Math.ceil(ms / 1000));
+        var m = Math.floor(total / 60);
+        var s = total % 60;
+        return String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+      }
+
+      function remainingMs(s) {
+        if (!s) return 0;
+        if (s.phase === "paused") return Math.max(0, s.remainingMs || 0);
+        if (s.phase === "running" && s.endAt) return Math.max(0, s.endAt - Date.now());
+        return 0;
+      }
+
+      function beep() {
+        try {
+          var Ctx = window.AudioContext || window.webkitAudioContext;
+          var ctx = new Ctx();
+          var now = ctx.currentTime;
+          function tone(freq, start, dur) {
+            var osc = ctx.createOscillator();
+            var gain = ctx.createGain();
+            osc.type = "square";
+            osc.frequency.setValueAtTime(freq, now + start);
+            gain.gain.setValueAtTime(0.0001, now + start);
+            gain.gain.exponentialRampToValueAtTime(0.08, now + start + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + start + dur);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now + start);
+            osc.stop(now + start + dur + 0.02);
+          }
+          tone(660, 0, 0.18);
+          tone(880, 0.2, 0.28);
+          setTimeout(function () { ctx.close(); }, 800);
+        } catch (e) {}
+      }
+
+      function show(view) {
+        setupEl.hidden = view !== "setup";
+        sessionEl.hidden = view !== "session";
+        shipEl.hidden = view !== "ship";
+      }
+
+      function renderShipped() {
+        var list = loadShipped();
+        entriesEl.innerHTML = "";
+        emptyEl.hidden = list.length > 0;
+        list.forEach(function (item) {
+          var li = document.createElement("li");
+          li.className = "entry";
+          var what = document.createElement("div");
+          what.className = "what";
+          what.textContent = item.shipped;
+          var meta = document.createElement("div");
+          meta.className = "meta";
+          var when = new Date(item.at).toLocaleString(undefined, {
+            dateStyle: "medium",
+            timeStyle: "short"
+          });
+          meta.textContent = item.task + " · " + when;
+          var del = document.createElement("button");
+          del.className = "ghost";
+          del.type = "button";
+          del.textContent = "Delete";
+          del.setAttribute("aria-label", "Delete shipped entry");
+          del.addEventListener("click", function () {
+            var next = loadShipped().filter(function (x) { return x.id !== item.id; });
+            saveShipped(next);
+            renderShipped();
+          });
+          li.appendChild(what);
+          li.appendChild(del);
+          li.appendChild(meta);
+          entriesEl.appendChild(li);
+        });
+      }
+
+      function stopTick() {
+        if (tickId) { clearInterval(tickId); tickId = null; }
+      }
+
+      function complete(playSound) {
+        if (!session) return;
+        session.phase = "done";
+        session.endAt = null;
+        session.remainingMs = 0;
+        session.paused = false;
+        if (playSound && !session.beeped) {
+          session.beeped = true;
+          beep();
+        } else {
+          session.beeped = true;
+        }
+        saveSession(session);
+        stopTick();
+        shipTaskEl.textContent = session.task;
+        shippedInput.value = "";
+        show("ship");
+        shippedInput.focus();
+      }
+
+      function tick() {
+        if (!session || session.phase !== "running") return;
+        var left = remainingMs(session);
+        timerEl.textContent = formatTime(left);
+        if (left <= 0) complete(true);
+      }
+
+      function startTick() {
+        stopTick();
+        tick();
+        tickId = setInterval(tick, 200);
+      }
+
+      function startSession(task) {
+        saveSession({
+          task: task,
+          endAt: Date.now() + DURATION_MS,
+          remainingMs: DURATION_MS,
+          paused: false,
+          phase: "running",
+          beeped: false
+        });
+        currentTaskEl.textContent = task;
+        pauseBtn.textContent = "Pause";
+        timerEl.textContent = formatTime(DURATION_MS);
+        show("session");
+        startTick();
+      }
+
+      function restore() {
+        session = loadSession();
+        if (!session || !session.task) {
+          session = null;
+          show("setup");
+          return;
+        }
+        if (session.phase === "done") {
+          complete(false);
+          return;
+        }
+        if (session.phase === "paused") {
+          currentTaskEl.textContent = session.task;
+          timerEl.textContent = formatTime(remainingMs(session));
+          pauseBtn.textContent = "Resume";
+          show("session");
+          return;
+        }
+        if (session.phase === "running") {
+          if (remainingMs(session) <= 0) {
+            complete(false);
+            return;
+          }
+          currentTaskEl.textContent = session.task;
+          pauseBtn.textContent = "Pause";
+          show("session");
+          startTick();
+          return;
+        }
+        show("setup");
+      }
+
+      startBtn.addEventListener("click", function () {
+        var task = (taskInput.value || "").trim();
+        if (!task) {
+          taskInput.focus();
+          return;
+        }
+        startSession(task);
+      });
+      taskInput.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") startBtn.click();
+      });
+
+      pauseBtn.addEventListener("click", function () {
+        if (!session) return;
+        if (session.phase === "running") {
+          var left = remainingMs(session);
+          session.remainingMs = left;
+          session.endAt = null;
+          session.paused = true;
+          session.phase = "paused";
+          saveSession(session);
+          stopTick();
+          timerEl.textContent = formatTime(left);
+          pauseBtn.textContent = "Resume";
+        } else if (session.phase === "paused") {
+          session.endAt = Date.now() + (session.remainingMs || 0);
+          session.paused = false;
+          session.phase = "running";
+          saveSession(session);
+          pauseBtn.textContent = "Pause";
+          startTick();
+        }
+      });
+
+      giveupBtn.addEventListener("click", function () {
+        stopTick();
+        saveSession(null);
+        taskInput.value = "";
+        show("setup");
+        taskInput.focus();
+      });
+
+      saveBtn.addEventListener("click", function () {
+        var line = (shippedInput.value || "").trim();
+        if (!line) {
+          shippedInput.focus();
+          return;
+        }
+        var list = loadShipped();
+        list.unshift({
+          id: String(Date.now()) + "-" + Math.random().toString(36).slice(2, 8),
+          task: session ? session.task : "",
+          shipped: line,
+          at: Date.now()
+        });
+        saveShipped(list);
+        saveSession(null);
+        shippedInput.value = "";
+        taskInput.value = "";
+        show("setup");
+        renderShipped();
+        taskInput.focus();
+      });
+      shippedInput.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") saveBtn.click();
+      });
+
+      renderShipped();
+      restore();
+    })();
+  </script>
+</body>
+</html>
